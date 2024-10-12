@@ -1,0 +1,155 @@
+{% extends 'StationMaster/Master_navbar_sidebar.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Ticket</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light grey background for the body */
+        }
+        .container {
+            margin-top: 30px;
+            width: 100%; /* Increase container width */
+            max-width: 1500px; /* Set a max-width to control the container size */
+            padding-left: 10px; /* Add padding to move the table to the right */
+        }
+        .table-container {
+            background-color: #ffffff; /* White background for the table container */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            padding: 20px;
+            overflow-x: auto; /* Enable horizontal scrolling */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dee2e6; /* Lighter border color */
+            text-align: left;
+            padding: 12px;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #343a40; /* Dark background for header */
+            color: #ffffff; /* White text color */
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2; /* Zebra striping */
+        }
+        tr:hover {
+            background-color: #e9ecef; /* Highlight row on hover */
+        }
+        tr:hover td {
+            font-weight: bold; /* Bold text on hover */
+        }
+        h1 {
+            text-align: center;
+            color: #343a40; /* Darker color for the heading */
+            margin-bottom: 20px;
+        }
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content"><br><br>
+                <div class="main-body">
+                    <div class="page-wrapper">
+    <div class="container">
+        <h1>View Tickets</h1>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>SL No</th>
+                        <th>Ticket Number</th>
+                        <th>Date</th>
+                        <th>Service Start Point</th>
+                        <th>Service Start Time</th>
+                        <th>Service End Point</th>
+                        <th>Adult Count</th>
+                        <th>Children Count</th>
+                        <th>Passenger Name</th>
+                        <th>Boat</th>
+                        <th>Amount(Rs.)</th>
+                        <th>Status</th> <!-- New Status Column -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in booking %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.ticket_number }}</td>
+                        <td>{{ item.date }}</td>
+                        <td>{{ item.service.services_startpoint.place_name }}</td>
+                        <td>{{ item.service.assignboat_starttime }}</td>
+                        <td>{{ item.service.services_endpoint.place_name }}</td>
+                        <td>{{ item.adults_count }}</td>
+                        <td>{{ item.childrens_count }}</td>
+                        <td>{{ item.user.first_name }} {{ item.user.last_name }}</td>
+                        <td>{{ item.service.assignboat_boat.boat_name }}</td>
+                        <td>{{ item.book_amount }}</td>
+                        <td>
+                            {% if item.payment == 1 %}
+                                <span class="badge badge-success">Payment Done</span>
+                            {% elif item.payment == 0 %}
+                                <span class="badge badge-danger">Payment Not Done</span>
+                            {% elif item.payment == 2 %}
+                                <span class="text-danger">Canceled</span> | 
+                                <form action="{% url 'WebStationMaster:refund' %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ item.id }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">Refund</button>
+                                </form>
+                            {% elif item.payment == 3 %}
+                                <span class="status-refunded">Refunded : Rs.{{ item.refund_amount_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="13" class="text-center">No Tickets Booked.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if msg %}
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endif %}
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
+{% endblock content %}

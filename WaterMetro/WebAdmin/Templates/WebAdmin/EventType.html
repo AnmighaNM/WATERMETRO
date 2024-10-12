@@ -1,0 +1,173 @@
+{% extends 'WebAdmin/Admin_navbar_sidebar.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper">
+<div class="pcoded-content">
+    <!-- Page-header end -->
+    <div class="pcoded-inner-content">
+        <div class="main-body">
+            <div class="page-wrapper">
+                <div class="page-body"><br><br>
+                        <!-- Add/Update Event Type Form -->
+                        <div class="col-md-12" style="padding-left: 30%; padding-right: 30%;">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0">{% if updata %}Edit{% else %}Add New{% endif %} Event Type</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="eventTypeForm" method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_mode" value="{% if updata %}update{% else %}add{% endif %}">
+                                        <div class="form-group">
+                                            <label for="txt_eventtype">Event Type</label>
+                                            <input type="text" class="form-control" name="txt_eventtype" id="txt_eventtype" value="{{ updata.event_type }}" placeholder="Enter event type name">
+                                            <small id="eventTypeError" class="form-text text-danger"></small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt_eventtype">Event Rate</label>
+                                            <input type="number" class="form-control" name="txt_rate" maxlength="5" min="0" value="{{updata.event_rate}}" placeholder="Enter event rate">
+                                            <small id="eventrateError" class="form-text text-danger"></small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt_eventtype">Event Details</label>
+                                            <textarea class="form-control" name="txt_details">{{updata.event_details}}</textarea>
+                                            <small id="eventdetailsError" class="form-text text-danger"></small>
+                                        </div>
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> {% if updata %}Update{% else %}Save{% endif %}</button>
+                                        <button type="button" id="cancelButton" class="btn btn-secondary"><i class="fa fa-times"></i> Cancel</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Types List -->
+                        <div class="col-md-12" style="padding-left: 10%; padding-right: 10%;"><br><br>
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0">Event Types List</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Event Type</th>
+                                                    <th>Event Rate</th>
+                                                    <th>Event Details</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for i in Data %}
+                                                <tr>
+                                                    <td>{{ forloop.counter }}</td>
+                                                    <td>{{ i.event_type }}</td>
+                                                    <td>{{ i.event_rate }}</td>
+                                                    <td>{{ i.event_details }}</td>
+                                                    <td>
+                                                        <span class="badge {% if i.status == 1 %}badge-success{% else %}badge-danger{% endif %}">
+                                                            {{ i.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <!-- Edit Button -->
+                                                        <a href="{% url 'WebAdmin:Update_Eventtype' i.id %}" class="btn btn-sm btn-info" title="Edit">
+                                                            <i class="fa fa-edit"></i> Edit
+                                                        </a>
+                                                        <!-- Status Toggle Button -->
+                                                        <a href="{% url 'WebAdmin:Toggle_Eventtype_Status' i.id %}" class="btn btn-sm {% if i.status == 1 %}btn-danger{% else %}btn-success{% endif %}" title="{% if i.status == 1 %}Deactivate{% else %}Activate{% endif %}">
+                                                            <i class="fa {% if i.status == 1 %}fa-times{% else %}fa-check{% endif %}"></i> {% if i.status == 1 %}Deactivate{% else %}Activate{% endif %}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="6" class="text-center">No event types found.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><br><br>
+                    </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Validate event type on blur
+        $('#txt_eventtype').on('blur', function() {
+            let eventType = $(this).val();
+            if (!eventType) {
+                $('#eventTypeError').text('Event Type is required');
+            } else if (!/^[a-zA-Z\s]+$/.test(eventType)) {
+                $('#eventTypeError').text('Event Type must contain only characters');
+            } else if (eventType.length < 3) {
+                $('#eventTypeError').text('Event Type must be at least 3 characters long');
+            } else {
+                $('#eventTypeError').text('');
+            }
+        });
+
+        // Validate on form submission
+        $('#eventTypeForm').on('submit', function(event) {
+            event.preventDefault();
+            
+            let eventType = $('#txt_eventtype').val();
+            let valid = true;
+
+            // Validate event type
+            if (!eventType) {
+                $('#eventTypeError').text('Event Type is required');
+                valid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(eventType)) {
+                $('#eventTypeError').text('Event Type must contain only characters');
+                valid = false;
+            } else if (eventType.length < 3) {
+                $('#eventTypeError').text('Event Type must be at least 3 characters long');
+                valid = false;
+            } else {
+                $('#eventTypeError').text('');
+            }
+
+            // Submit the form if all validations pass
+            if (valid) {
+                $.ajax({
+                    url: '',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        $('#eventTypeError').text('An error occurred. Please try again.');
+                    }
+                });
+            }
+        });
+
+        // Cancel button logic
+        $('#cancelButton').on('click', function() {
+            let formMode = $('input[name="form_mode"]').val();
+            if (formMode === 'update') {
+                window.location.href = '{% url "WebAdmin:EventType" %}';
+            } else {
+                $('#eventTypeForm')[0].reset();
+            }
+        });
+    });
+</script>
+{% endblock extra_js %}
+{% endblock content %}

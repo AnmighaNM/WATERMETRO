@@ -1,0 +1,166 @@
+{% extends 'StationMaster/Master_navbar_sidebar.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background: #f0f2f5;
+        }
+        .profile-container {
+            margin-top: 50px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-header img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            border: 4px solid #007bff;
+        }
+        .profile-header h2 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #333;
+        }
+        .profile-header .btn {
+            margin-top: 10px;
+            font-size: 14px;
+            border-radius: 20px;
+        }
+        .profile-details {
+            text-align: left; /* Center the profile details */
+            padding-left: 220px;
+        }
+        .profile-details .row {
+            margin-bottom: 15px;
+        }
+        .profile-details label {
+            font-weight: bold;
+        }
+        .profile-details p {
+            margin-bottom: 0;
+            color: #555;
+        }
+        .btn-custom {
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 3D effect for buttons */
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #4e555b;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content"><br><br>
+                <div class="main-body">
+                    <div class="page-wrapper">
+    <div class="container profile-container">
+        <div class="profile-header">
+            <img src="{{ masterdata.master_photo.url }}" alt="Profile Photo">
+            <h2>{{ masterdata.master_name }}</h2>
+        </div>
+
+        <div class="text-center mb-3">
+            <a href="{% url 'WebStationMaster:EditProfile' %}" class="btn btn-primary btn-custom">
+                <i class="fas fa-user-edit"></i> Edit Profile
+            </a>&nbsp;&nbsp;&nbsp;
+            <a href="{% url 'WebStationMaster:ChangePassword' %}" class="btn btn-secondary btn-custom">
+                <i class="fas fa-key"></i> Change Password
+            </a>
+        </div>
+
+        <div class="profile-details"><br>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>First Name</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ master.first_name }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Last Name</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ master.last_name }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Email</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ master.email }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Phone</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ masterdata.master_contact }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Address</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ masterdata.master_address }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+    <!-- Include Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
+{% endblock content %}

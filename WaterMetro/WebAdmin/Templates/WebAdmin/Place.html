@@ -1,0 +1,229 @@
+{% extends 'WebAdmin/Admin_navbar_sidebar.html' %}
+{% load static %}
+{% block content %}
+<div class="content-wrapper">
+    <div class="pcoded-content">
+        <div class="pcoded-inner-content"><br><br>
+            <div class="main-body">
+                <div class="page-wrapper">
+                    <div class="row">
+                        <!-- Form Section -->
+                        <div class="col-md-12 mb-4" style="padding-left: 25%; padding-right: 25%;">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5>Add/Update Station</h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Alert for success messages -->
+                                    <div id="successAlert" class="alert alert-success d-none" role="alert">
+                                        <strong id="alertMessage"></strong>
+                                    </div>
+
+                                    <form action="" method="POST" id="placeForm">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="form_mode" value="{% if udata %}update{% else %}create{% endif %}">
+                                        <input type="hidden" name="place_id" value="{% if udata %}{{ udata.id }}{% endif %}">
+                                        <div class="form-group">
+                                            <label for="district">District Name</label>
+                                            <select class="form-control" name="dropdown" id="district">
+                                                <option value="">Select District</option>
+                                                {% for i in Ddata %}
+                                                    <option value="{{ i.id }}" {% if udata and udata.district.id == i.id %}selected{% endif %}>
+                                                        {{ i.district_name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <small id="districtError" class="form-text text-danger"></small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="place">Station</label>
+                                            <input type="text" class="form-control" name="place" id="place" value="{% if udata %}{{ udata.place_name }}{% endif %}">
+                                            <small id="placeNameError" class="form-text text-danger"></small>
+                                        </div>
+                                        <div class="form-group mt-4" align="center">
+                                            <button type="submit" class="btn btn-success submit-btn">
+                                                <i class="fas fa-check"></i> Submit
+                                            </button>
+                                            <button type="reset" class="btn btn-secondary cancel-btn" id="cancelButton">
+                                                <i class="fas fa-times"></i> Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Table Section -->
+                        <div class="col-md-12" style="padding-left: 10%; padding-right: 10%;">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5>Places List</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover">
+                                            <thead class="thead-dark">
+                                                <tr>
+                                                    <th>Sl No</th>
+                                                    <th>District</th>
+                                                    <th>Station</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="placeList">
+                                                {% for i in place %}
+                                                    <tr>
+                                                        <td>{{ forloop.counter }}</td>
+                                                        <td>{{ i.district.district_name }}</td>
+                                                        <td>{{ i.place_name }}</td>
+                                                        <td>
+                                                            {% if i.status == 1 %}
+                                                                <span class='badge badge-success'>Active</span>
+                                                            {% else %}
+                                                                <span class='badge badge-danger'>Inactive</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <a href="javascript:void(0);" class="btn btn-sm btn-info" onclick="editPlace('{{ i.id }}', '{{ i.place_name }}', '{{ i.district.id }}')">
+                                                                <i class="fas fa-edit"></i> Update
+                                                            </a>
+                                                            <a href="{% url 'WebAdmin:Toggle_Place_Status' i.id %}" class="btn btn-sm btn-{% if i.status == 1 %}danger{% else %}success{% endif %}">
+                                                                <i class="fas fa-power-off" style="margin-right: 10px;"></i>  
+                                                                {% if i.status == 1 %}Deactivate{% else %}Activate{% endif %}
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center">No Stations found.</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Validation on place name field
+        $('#place').on('blur', function () {
+            let placeName = $(this).val();
+            if (!placeName) {
+                $('#placeNameError').text('Place Name is required');
+            } else if (!/^[a-zA-Z\s]+$/.test(placeName)) {
+                $('#placeNameError').text('Place Name must contain only letters and spaces');
+            } else if (placeName.length < 3) {
+                $('#placeNameError').text('Place Name must be at least 3 characters long');
+            } else {
+                $('#placeNameError').text('');
+            }
+        });
+
+        // Validation on district dropdown field
+        $('#district').on('blur', function () {
+            let district = $(this).val();
+            if (!district) {
+                $('#districtError').text('Please select a district');
+            } else {
+                $('#districtError').text('');
+            }
+        });
+
+        // Submit form via AJAX
+        $('form').on('submit', function (event) {
+            event.preventDefault();
+
+            let placeName = $('input[name="place"]').val();
+            let district = $('select[name="dropdown"]').val();
+            let valid = true;
+
+            // Client-side validation
+            if (!placeName) {
+                $('#placeNameError').text('Place Name is required');
+                valid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(placeName)) {
+                $('#placeNameError').text('Place Name must contain only letters and spaces');
+                valid = false;
+            } else if (placeName.length < 3) {
+                $('#placeNameError').text('Place Name must be at least 3 characters long');
+                valid = false;
+            } else {
+                $('#placeNameError').text('');
+            }
+
+            if (!district) {
+                $('#districtError').text('Please select a district');
+                valid = false;
+            } else {
+                $('#districtError').text('');
+            }
+
+            if (valid) {
+                $.ajax({
+                    url: '',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        $('#alertMessage').text(response.message);
+                        $('#successAlert').removeClass('d-none');
+
+                        // Hide the alert after 5.5 seconds
+                        setTimeout(function () {
+                            $('#successAlert').addClass('d-none');
+                        }, 5500);
+
+                        // Reload the place list dynamically
+                        $.ajax({
+                            url: '',
+                            success: function (data) {
+                                let placeList = $(data).find('#placeList').html();
+                                $('#placeList').html(placeList);
+                            }
+                        });
+
+                        // Reset the form after insertion
+                        if (response.success && $('input[name="form_mode"]').val() === 'create') {
+                            $('#placeForm')[0].reset();
+                        }
+                    },
+                    error: function (xhr) {
+                        if (xhr.responseJSON.error.includes("Place Name")) {
+                            $('#placeNameError').text(xhr.responseJSON.error);
+                        }
+                    }
+                });
+            }
+        });
+
+        // Cancel button functionality
+        $('#cancelButton').on('click', function () {
+            let formMode = $('input[name="form_mode"]').val();
+            if (formMode === 'update') {
+                window.location.href = '{% url "WebAdmin:Place" %}';
+            } else {
+                $('#placeForm')[0].reset();
+                $('#districtError').text('');
+                $('#placeNameError').text('');
+            }
+        });
+    });
+
+    // Populate form with existing data for editing
+    function editPlace(id, placeName, districtId) {
+        $('input[name="form_mode"]').val('update');
+        $('input[name="place_id"]').val(id);
+        $('#place').val(placeName);
+        $('#district').val(districtId);
+    }
+</script>
+{% endblock content %}

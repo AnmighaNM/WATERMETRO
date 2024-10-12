@@ -1,0 +1,215 @@
+{% extends 'StationMaster/Master_navbar_sidebar.html' %}
+{% load static %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Ticket Booked</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa; /* Light grey background for the body */
+        }
+        .container {
+            margin-top: 30px;
+            width: 100%; /* Increase container width */
+            max-width: 1500px; /* Set a max-width to control the container size */
+            padding-left: 10px; /* Add padding to move the table to the right */
+        }
+        .table thead th {
+            background-color: #343a40;
+            color: white;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .status-not-payed { color: red; }
+        .status-payed { color: green; }
+        .status-assigned { color: green; }
+        .status-canceled { color: red; }
+        .status-refunded { color: red; }
+        .action-links a { margin-right: 5px; }
+
+        .table-container {
+            background-color: #ffffff; /* White background for the table container */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            padding: 20px;
+            overflow-x: auto; /* Enable horizontal scrolling */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dee2e6; /* Lighter border color */
+            text-align: left;
+            padding: 12px;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #343a40; /* Dark background for header */
+            color: #ffffff; /* White text color */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="pcoded-content">
+            <div class="pcoded-inner-content"><br><br>
+                <div class="main-body">
+                    <div class="page-wrapper">
+                        <div class="container">
+        
+            <h1 class="text-center my-4">View Event Tickets</h1>
+            <div class="table-container">
+            <table class="table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>SL No</th>
+                        <th>Event Number</th>
+                        <th>Date</th>
+                        <th>Adult Count</th>
+                        <th>Children Count</th>
+                        <th>Event</th>
+                        <th>Event Start Point</th>
+                        <th>Event Start Time</th>
+                        <th>Event End Point</th>
+                        <th>Event Duration</th>
+                        <th>Customer</th>
+                        <th>Contact</th>
+                        <th>Boat</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in booking %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.event_number }}</td>
+                        <td>{{ item.event_date }}</td>
+                        <td>{{ item.adult_count }}</td>
+                        <td>{{ item.children_count }}</td>
+                        <td>{{ item.event_type.event_type }}</td>
+                        <td>{{ item.event_startpoint.place_name }}</td>
+                        <td>{{ item.event_starttime }}</td>
+                        <td>{{ item.event_endpoint.place_name }}</td>
+                        <td>{{ item.duration }}</td>
+                        <td>{{ item.user.first_name }} {{ item.user.last_name }}</td>
+                        <td>{{ item.user.profile.user_contact }}</td>
+                        <td> {{ item.boat_deck}} ||
+                            {% if item.assign %}
+                                {{ item.assign.boat_name }}
+                            {% else %}
+                                <span class="text-danger">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td class="action-links">
+                            {% if item.status == 0 %}
+                                <span class="status-not-payed">Not Payed</span>
+                            {% elif item.status == 1 %}
+                                <span class="status-payed">Payed</span> | 
+                                <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#assignBoatModal" data-booking="{{ item.id }}" data-boatdeck="{{ item.boat_deck }}">Assign Boat</button>
+                            {% elif item.status == 2 %}
+                                <span class="status-assigned">Assigned</span>
+                            {% elif item.status == 3 %}
+                                <span class="status-canceled">Canceled</span>
+                                <form action="{% url 'WebStationMaster:initiate_refund' %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ item.id }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">Refund</button>
+                                </form>
+                            {% elif item.status == 4 %}
+                                <span class="status-refunded">Refunded Rs.{{ item.refund_amount_display }}</span>
+                            {% else %}
+                                Error
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="14" class="text-center">No Events Booked.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div><BR><BR>
+</div>
+</div>
+</div>
+</div>
+    <!-- Assign Boat Modal -->
+    <div class="modal fade" id="assignBoatModal" tabindex="-1" role="dialog" aria-labelledby="assignBoatModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignBoatModalLabel">Assign Boat</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignBoatForm" action="{% url 'WebStationMaster:assign_boat' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" id="booking_id" name="booking_id" value="">
+                        <div class="form-group">
+                            <label for="boat">Select Boat:</label>
+                            <select class="form-control" id="boat_id" name="boat_id">
+                                <!-- Boat options will be dynamically loaded via AJAX -->
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Assign</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $('#assignBoatModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var bookingId = button.data('booking');
+            var boatDeck = button.data('boatdeck');
+            var modal = $(this);
+            modal.find('#booking_id').val(bookingId);
+
+            var boatSelect = modal.find('#boat_id');
+            boatSelect.empty();  // Clear previous options
+
+            // Fetch boats via AJAX
+            $.ajax({
+                url: '{% url "WebStationMaster:get_active_boats" %}',
+                type: 'GET',
+                data: { 'boat_deck': boatDeck },
+                success: function(data) {
+                    if (data.boats && data.boats.length > 0) {
+                        // Append boats to the select dropdown
+                        data.boats.forEach(function(boat) {
+                            boatSelect.append(new Option(boat.boat_name + " (Capacity: " + boat.boat_capacity + ")", boat.id));
+                        });
+                    } else {
+                        boatSelect.append(new Option("No boats available", ""));
+                    }
+                },
+                error: function() {
+                    console.log("Error fetching boats.");
+                    boatSelect.append(new Option("Error fetching boats", ""));
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock content %}

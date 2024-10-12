@@ -1,0 +1,150 @@
+{% extends 'WebAdmin/Admin_navbar_sidebar.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom CSS */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+           font-family: "Times New Roman", Times, serif;
+           margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            margin-right: 5px;
+        }
+        .result-table {
+            margin-top: 20px;
+        }
+        .print-btn {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+{% block content %}
+<body>
+    <h1 align="center">Report</h1>
+    <div class="container">
+        <table class="table">
+            <tr>
+                <td>From Date</td>
+                <td><input type="date" class="form-control" id="txt_fdate" onchange="getReport()"></td>
+                <td>To Date</td>
+                <td><input type="date" class="form-control" id="txt_tdate" onchange="getReport()"></td>
+                <td>Status</td>
+                <td>
+                    <select class="form-control" id="txt_con" onchange="getReport()">
+                        <option value="">....Select....</option>
+                        <option value="0">Not Payed</option>
+                        <option value="1">Payed</option>
+                        <option value="2">Canceled & Not Refunded</option>
+                        <option value="3">Cancelled</option>
+                        <option value="4">Refunded</option>
+                    </select>
+                </td>
+                <td><button class="btn btn-primary print-btn" onclick="getPrint('result')">Print</button></td>
+            </tr>
+        </table>
+        <div id="result" class="result-table">
+            <table class="table">
+                <tr>
+                    <th>SL No</th>
+                    <th>Date</th>
+                    <th>Adult Count</th>
+                    <th>Children Count</th>
+                    <th>Amount</th>
+                    <th>Ticket number</th>
+                    <th>User Name</th>
+                    <th>Boat</th>
+                    <th>Action</th>
+                </tr>
+                {% for item in booking %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.adults_count }}</td>
+                    <td>{{ item.childrens_count }}</td>
+                    <td>{{ item.book_amount }}</td>
+                    <td>{{ item.ticket_number }}</td>
+                    <td>{{ item.user.first_name }} {{ item.user.last_name }}</td>
+                    <td>
+                        {% if item.assign %}
+                        {{ item.assign.boat.boat_name }}
+                        {% else %}
+                        <span style="color: red;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.payment == 0 %}
+                        <span style="color: red;">Not Payed</span>
+                        {% elif item.payment == 1 %}
+                        <span style="color: green;">Payed</span>
+                        {% elif item.payment == 2 %}
+                        <span style="color: green;">Canceled & Not Refunded</span>
+                        {% elif item.payment == 3 %}
+                        <span style="color: red;">Canceled</span>
+                        {% elif item.payment == 4 %}
+                        <span style="color: red;">Refunded</span>
+                        {% else %}
+                        Error
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+     <!-- Include jQuery -->
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+     <script>
+         function getReport() {
+             var status = document.getElementById('txt_con').value;
+             var fdate = document.getElementById('txt_fdate').value;
+             var tdate = document.getElementById('txt_tdate').value;
+             var url = "{% url 'WebAdmin:AjaxReport' %}";
+ 
+             $.ajax({
+                 url: url,
+                 type: 'GET',
+                 data: { status: status, fdate: fdate, tdate: tdate },
+                 success: function (data) {
+                     $("#result").html(data);
+                 },
+                 error: function (xhr, errmsg, err) {
+                     console.log("AJAX request failed: " + errmsg);
+                 }
+             });
+         }
+ 
+         function getPrint(bill) {
+             var printContent = document.getElementById(bill).innerHTML;
+             var originalContent = document.body.innerHTML;
+             document.body.innerHTML = printContent;
+             window.print();
+             document.body.innerHTML = originalContent;
+         }
+     </script>
+ </body>
+ </html>
+ {% endblock content %}

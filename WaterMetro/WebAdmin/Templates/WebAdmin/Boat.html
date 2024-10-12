@@ -1,0 +1,223 @@
+{% extends 'WebAdmin/Admin_navbar_sidebar.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boat Details</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 14px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            // Function to toggle the deck option visibility
+            function toggleDeckOption() {
+                let selectedService = $('#boatType').val();
+                if (selectedService === 'Tourism and Recreational Boat Services') {
+                    $('#deckOption').removeClass('hidden'); // Show deck option
+                } else {
+                    $('#deckOption').addClass('hidden'); // Hide deck option
+                }
+            }
+
+            // Run toggleDeckOption when the dropdown changes
+            $('#boatType').on('change', toggleDeckOption);
+
+            // Run it initially on page load
+            toggleDeckOption();
+
+            // Form validation for deck type
+            $('#boatForm').on('submit', function(event) {
+                let valid = true;
+                let selectedService = $('#boatType').val();
+                let deckType = $('#deckType').val();
+
+                if (selectedService === 'Tourism and Recreational Boat Services' && !deckType) {
+                    $('#deckError').text('Please select a deck type');
+                    valid = false;
+                } else {
+                    $('#deckError').text('');
+                }
+
+                if (!valid) {
+                    event.preventDefault(); // Prevent form submission if validation fails
+                }
+            });
+
+            $('#cancelButton').on('click', function () {
+                let formMode = $('#update_id').val();
+                if (formMode !== '') {
+                    window.location.href = '{% url "WebAdmin:Boat" %}';
+                } else {
+                    $('#districtForm')[0].reset();
+                }
+            });
+
+            // Handle form submission via AJAX
+            $('#boatForm').on('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+                $.ajax({
+                    type: $(this).attr('method'),
+                    url: $(this).attr('action'),
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            $('#alertPlaceholder').html('<div class="alert alert-success alert-dismissible fade show" role="alert">' + response.message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#alertPlaceholder').html('<div class="alert alert-danger alert-dismissible fade show" role="alert">' + xhr.responseJSON.error + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="col-md-12" style="padding-left: 20%; padding-right: 20%;"><br>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Boat Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertPlaceholder"></div> <!-- Alert placeholder -->
+                        <form id="boatForm" action="" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_mode" value="{% if updata %}update{% else %}create{% endif %}">
+                            <div class="mb-3">
+                                <label for="txt_name" class="form-label">Boat Name</label>
+                                <input type="text" class="form-control" name="txt_name" value="{{ updata.boat_name }}">
+                                <div class="error" id="nameError"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="dropdown" class="form-label">Service</label>
+                                <select class="form-control" name="dropdown" id="boatType">
+                                    <option value="">Select Boat Type</option>
+                                    <option value="Public Transport Boat Services" {% if updata and updata.boat_service == 'Public Transport Boat Services' %}selected{% endif %}>Public Transport Boat Services</option>
+                                    <option value="Tourism and Recreational Boat Services" {% if updata and updata.boat_service == 'Tourism and Recreational Boat Services' %}selected{% endif %}>Tourism and Recreational Boat Services</option>
+                                </select>
+                                <div class="error" id="TypeError"></div>
+                            </div>
+
+                            <div id="deckOption" class="mb-3 hidden">
+                                <label for="deckType" class="form-label">Deck Type</label>
+                                <select class="form-control" name="deckType" id="deckType">
+                                    <option value="">Select Deck Type</option>
+                                    <option value="Single Deck" {% if updata and updata.boat_deck == 'Single Deck' %}selected{% endif %}>Single Deck</option>
+                                    <option value="Double Deck" {% if updata and updata.boat_deck == 'Double Deck' %}selected{% endif %}>Double Deck</option>
+                                </select>
+                                <div class="error" id="deckError"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="txt_capacity" class="form-label">Passenger Capacity</label>
+                                <input type="text" class="form-control" name="txt_capacity" maxlength="3" value="{{ updata.boat_capacity }}">
+                                <div class="error" id="capacityError"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="txt_date" class="form-label">Date Of Entry</label>
+                                <input type="date" class="form-control" name="txt_date" value="{{ updata.boat_entrydate|date:'Y-m-d' }}">
+                                <div class="error" id="dateError"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" class="btn btn-success submit-btn me-2">
+                                    <i class="fas fa-check"></i> Submit
+                                </button>
+                                <button type="button" id="cancelButton" class="btn btn-secondary cancel-btn">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12"><br><br>
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Boat List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th scope="col">Sl.No</th>
+                                        <th>Boat Name</th>
+                                        <th>Service</th>
+                                        <th>Deck Type</th>
+                                        <th>Passenger Capacity</th>
+                                        <th>Date Of Entry</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for boat in Data %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ boat.boat_name }}</td>
+                                            <td>{{ boat.boat_service }}</td>
+                                            <td>{{ boat.boat_deck }}</td>
+                                            <td>{{ boat.boat_capacity }}</td>
+                                            <td>{{ boat.boat_entrydate }}</td>
+                                            <td>
+                                                {% if boat.status == 1 %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'WebAdmin:Update_Boat' boat.id %}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i> Edit</a>
+                                                {% if boat.status == 1 %}
+                                                    <a href="{% url 'WebAdmin:Toggle_Boat_Status' boat.id %}" class="btn btn-danger btn-sm"><i class="fas fa-ban"></i> Deactivate</a>
+                                                {% else %}
+                                                    <a href="{% url 'WebAdmin:Toggle_Boat_Status' boat.id %}" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Activate</a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan="8" class="text-center">No records found.</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+{% endblock %}

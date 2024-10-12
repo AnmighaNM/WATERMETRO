@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Master</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link href="{% static 'StationMaster/css/custom.css' %}" rel='stylesheet' type='text/css' />
+    <style>
+    .navbar {
+        height: 80px; /* Increase the height */
+    }
+
+    .navbar-brand img {
+        width: 60px; /* Adjust the width as needed */
+        height: 60px; /* Adjust the height as needed */
+    }
+
+    .navbar-nav .nav-link {
+        font-size: 18px; /* Increase font size */
+        line-height: 80px; /* Align text vertically */
+    }
+
+    .navbar-nav .nav-link img {
+        width: 50px; /* Decrease the image width */
+        height: 50px; /* Decrease the image height */
+        border-radius: 50%; /* Ensure the image is circular */
+    }
+
+    .main-sidebar {
+        background-color: #f8f9fa !important; /* Light background color */
+    }
+
+    .nav-link {
+        color: #000000; /* Text color */
+    }
+
+    .nav-link:hover {
+        color: #007bff;
+    }
+
+    .nav-item .nav-link.active {
+        color: #007bff;
+    }
+
+    .nav-pills .nav-link {
+        padding: 10px 15px; /* Adjust padding for better appearance */
+    }
+
+    .brand-link {
+        background-color: #f8f9fa !important; /* Light background color */
+        color: #000000 !important; /* Text color */
+        font-size: 18px; /* Increase text size */
+        padding: 10px 15px; /* Adjust padding */
+    }
+
+    .brand-link img {
+        width: 50px; /* Adjust the width as needed */
+        height: 50px; /* Adjust the height as needed */
+    }
+
+    .navbar-nav.mx-auto {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .navbar-nav.ml-auto {
+        margin-left: auto;
+    }
+    </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+        <nav class="main-header navbar navbar-expand navbar-dark bg-primary">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="{% url 'WebStationMaster:HomePage' %}" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item d-none d-sm-inline-block">
+                    <a href="#" class="nav-link"> </a>
+                </li>
+            </ul>
+            <!-- Centered content wrapper -->
+            <div class="navbar-nav mx-auto">
+                <!-- You can add centered content here if needed -->
+            </div>
+            
+            <!-- Right navbar links -->
+        </nav>
+        <!-- /.navbar -->
+        <!-- Main Sidebar Container -->
+        <aside class="main-sidebar sidebar-light-primary elevation-4"><br>
+            <!-- Brand Logo -->
+            <p class="brand-link">
+                <img src="{% static 'StationMaster/css/AQUA MOTUS-Circle.png' %}" alt="" />
+                &nbsp;&nbsp;&nbsp;<b>STATION MASTER</b>
+            </p>
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                
+                <!-- Sidebar Menu -->
+                <nav class="mt-2"><br><br>
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:HomePage' %}" class="nav-link active">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:Services' %}" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Services</p>
+                            </a>
+                        </li>
+                        <li class="nav-item user-request has-treeview">
+                            <a href="{% url 'WebStationMaster:View_Services' %}" class="nav-link">
+                                <i class="nav-icon fas fa-user-check"></i>
+                                <p>View Assign Boats</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:ViewTicketBooking' %}" class="nav-link">
+                                <i class="nav-icon fas fa-th-large"></i>
+                                <p>View Tickets Booked</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:vieweventbooking' %}" class="nav-link">
+                                <i class="nav-icon fas fa-th-large"></i>
+                                <p>View Events Booked</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:ViewComplaint' %}" class="nav-link">
+                                <i class="nav-icon fas fa-file-alt"></i>
+                                <p>View Complaints</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:RepliedComplaints' %}" class="nav-link">
+                                <i class="nav-icon fas fa-file-alt"></i>
+                                <p>Replied Complaints</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:MyProfile' %}" class="nav-link">
+                                <i class="nav-icon fas fa-cogs"></i>
+                                <p>Profile</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebStationMaster:Report' %}" class="nav-link">
+                                <i class="nav-icon fas fa-file-alt"></i>
+                                <p>Report</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'WebGuest:Logout' %}" class="nav-link">
+                                <i class="nav-icon fas fa-sign-out-alt"></i>
+                                <p>Logout</p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- /.sidebar-menu -->
+            </div>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Main content block -->
+        
+        <!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap 5 and Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
+<!-- AdminLTE App -->
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+    </div>
+</body>
+</html>
+{% block content %}
+{% endblock content %}

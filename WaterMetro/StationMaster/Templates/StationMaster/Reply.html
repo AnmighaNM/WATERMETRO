@@ -1,0 +1,86 @@
+{% extends 'StationMaster/Master_navbar_sidebar.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reply Complaint</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .reply-container {
+            margin-top: 50px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        .reply-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .btn-submit {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body><br><br>
+    <div class="container reply-container">
+        <h2 class="reply-header">Reply to Complaint</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="form-group row">
+                <label for="user_name" class="col-sm-4 col-form-label">User Name</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext">{{ data.user.first_name }} {{ data.user.last_name }}</p>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="title" class="col-sm-4 col-form-label">Title</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext">{{ data.title }}</p>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="description" class="col-sm-4 col-form-label">Description</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext">{{ data.description }}</p>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="date" class="col-sm-4 col-form-label">Date</label>
+                <div class="col-sm-8">
+                    <p class="form-control-plaintext">{{ data.date }}</p>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="txt_reply" class="col-sm-4 col-form-label">Reply</label>
+                <div class="col-sm-8">
+                    <textarea name="txt_reply" id="txt_reply" class="form-control" rows="4" required></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-sm-12 text-center">
+                    <button type="submit" class="btn btn-submit btn-custom"><i class="fas fa-check"></i> Submit</button>
+                    <button type="reset" class="btn btn-cancel btn-custom" onclick="window.location.href='{% url 'WebStationMaster:ViewComplaint' %}'"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+{% endblock content %}

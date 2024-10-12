@@ -1,0 +1,248 @@
+{% extends 'User/HomePage.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booked Tickets</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Custom styles for View Tickets page */
+        body {
+            background: #f0f2f5;
+        }
+        #tickets-container {
+            margin: 50px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 95%;
+            max-width: 100%;
+        }
+        #tickets-table {
+            width: 100%;
+            margin: auto;
+        }
+        #tickets-table th, #tickets-table td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 15px;
+        }
+        #tickets-table th {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+        #tickets-table tr:hover {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        #tickets-table td a.btn-make-payment {
+            cursor: pointer;
+            text-decoration: none;
+        }
+        #tickets-table td a.btn-make-payment:hover {
+            background-color: #c3e6cb;
+            color: #155724;
+        }
+        #tickets-table td a.btn-make-payment {
+            font-size: 12px;
+            border-radius: 20px;
+            padding: 6px 12px;
+            background-color: #d4edda;
+            color: #155724;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #tickets-table tr:hover td {
+            cursor: pointer;
+        }
+        .status-not-payed {
+            color: red;
+            font-weight: bold;
+        }
+        .btn-cancel-booking, .btn-reschedule-booking {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .btn-cancel-booking:hover, .btn-reschedule-booking:hover {
+            background-color: #f5c6cb;
+        }
+    </style>
+</head>
+<body><br><br><br>
+    <div id="tickets-container" class="container-fluid">
+        <h1 class="text-center">Booked Event Tickets</h1>
+        <table id="tickets-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>SL No</th>
+                    <th>Event Number</th>
+                    <th>Date</th>
+                    <th>Adult Count</th>
+                    <th>Children Count</th>
+                    <th>Event</th>
+                    <th>Event Start Point</th>
+                    <th>Event Start Time</th>
+                    <th>Event End Point</th>
+                    <th>Event Duration</th>
+                    <th>Boat Name</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ticket  %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.event_number }}</td>
+                    <td>{{ item.event_date }}</td>
+                    <td>{{ item.adult_count }}</td>
+                    <td>{{ item.children_count }}</td>
+                    <td>{{ item.event_type.event_type }}</td>
+                    <td>{{ item.event_startpoint.place_name }}</td>
+                    <td>{{ item.event_starttime }}</td>
+                    <td>{{ item.event_endpoint.place_name }}</td>
+                    <td>{{ item.duration }}</td>
+                    <td>
+                        {{ item.boat_deck }} ||
+                        {% if item.assign %}
+                        {{ item.assign.boat_name }}
+                        {% else %}
+                        <span style="color: red;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.payment_id %}
+                        <span class="status-payed">Completed</span>
+                        {% else %}
+                        <span class="status-not-payed">Pending</span>
+                        <form action="{% url 'WebUser:payment_process' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="booking_id" value="{{ item.id }}">
+                        <a class="btn-make-payment"><button type="submit" ><i class="fas fa-credit-card"></i> Make Payment</button></a>
+                        </form>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not item.payment_id %}
+                            <button class="btn-cancel-booking" onclick="confirmCancel('{{ item.id }}')"><i class="fas fa-times"></i> Cancel</button>
+                        {% elif item.payment_id and item.status != 3 and item.status != 4 %}
+                             <button class="btn-cancel-booking" onclick="confirmCanceled('{{ item.id }}')"><i class="fas fa-times"></i> Cancel</button>
+                        {% elif item.status == 3 %}
+                            <span class="text-danger">Canceled</span>
+                        {% elif item.status == 4 %}
+                            <span class="text-danger">Refunded Rs.{{ item.refund_amount_display }}</span>
+                        {% endif %}
+                        
+                        <!-- Reschedule Button -->
+                        {% if item.status != 3 and item.status != 4 %}
+                            <button class="btn-reschedule-booking" onclick="showRescheduleModal('{{ item.id }}', '{{ item.event_date }}', '{{ item.event_starttime }}')"><i class="fas fa-calendar-alt"></i> Reschedule</button>
+                        {% endif %}
+
+                    </td>                    
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="13" class="text-center">No Events Booked.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div><br>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        function confirmCancel(bookingId) {
+            Swal.fire({
+                title: 'Are you sure to cancel the booking?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{% url "WebUser:cancel_event" %}?booking_id=' + bookingId;
+                }
+            })
+        }
+
+        function confirmCanceled(bookingId) {
+            Swal.fire({
+                title: 'Are you sure to cancel the booking?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{% url "WebUser:cancel_events" %}?booking_id=' + bookingId;
+                }
+            })
+        }
+
+            function showRescheduleModal(bookingId, defaultDate, defaultTime) {
+                Swal.fire({
+                    title: 'Reschedule Event',
+                    html: `
+                        <form id="reschedule-form">
+                            <label for="new_date">New Date:</label>
+                            <input type="date" id="new_date" name="new_date" class="swal2-input" value="${defaultDate}">
+                            <label for="new_time">New Time:</label>
+                            <input type="time" id="new_time" name="new_time" class="swal2-input" value="${defaultTime}">
+                        </form>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: 'Save',
+                    preConfirm: () => {
+                        const newDate = document.getElementById('new_date').value;
+                        const newTime = document.getElementById('new_time').value;
+                        if (!newDate || !newTime) {
+                            Swal.showValidationMessage('Both date and time are required.');
+                            return false;
+                        }
+                        return { newDate: newDate, newTime: newTime };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Make an AJAX call to update the date and time in the backend
+                        $.ajax({
+                            url: '{% url "WebUser:reschedule_event" %}',
+                            type: 'POST',
+                            data: {
+                                'booking_id': bookingId,
+                                'new_date': result.value.newDate,
+                                'new_time': result.value.newTime,
+                                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                            },
+                            success: function(response) {
+                                Swal.fire('Success', 'Event rescheduled successfully!', 'success').then(() => {
+                                    window.location.reload();
+                                });
+                            },
+                            error: function(error) {
+                                Swal.fire('Error', 'Failed to reschedule the event. Try again later.', 'error');
+                            }
+                        });
+                    }
+                });
+            }
+            </script>
+    </script>
+</body>
+</html>
+{% endblock content %}

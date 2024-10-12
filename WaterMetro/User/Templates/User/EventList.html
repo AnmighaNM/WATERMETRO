@@ -1,0 +1,75 @@
+{% extends 'User/HomePage.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .event-card {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+        .event-card-body {
+            padding: 25px;
+            text-align: center;
+        }
+        .event-title {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .book-button {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            border-radius: 50px;
+            transition: background-color 0.3s ease;
+        }
+        .book-button:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+       
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body><br><br><br><br><br><br>
+    <div class="container">
+        <h2 class="text-center">Events List</h2>
+        
+        <div class="row">
+            {% for i in event %}
+            <div class="col-md-4 col-sm-6 mb-4">
+                <div class="event-card">
+                    <div class="event-card-body">
+                        <div class="event-title">{{ i.event_type }}</div><br>
+                        <div class="event-rate"><b>Rate:</b> Rs.{{ i.event_rate }}</div>
+                        <div class="event-details"><b>Details:</b> {{ i.event_details }}</div><br>
+                        <a href="{% url 'WebUser:eventbooking' i.id %}" class="btn btn-primary book-button">Book Event</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}
+</body>
+</html>

@@ -1,0 +1,198 @@
+{% extends 'User/HomePage.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Booking</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Unique styles for the Ticket Booking page */
+        body.ticket-booking-page {
+            background-color: #f0f2f5; /* Light background for the entire page */
+            font-family: Arial, sans-serif;
+        }
+        .ticket-booking-container {
+            margin-top: 50px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 600px; /* Decrease the width of the form */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .ticket-booking-container h2 {
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+        .ticket-booking-form .form-control {
+            border-radius: 8px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .btn-submit {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-submit i {
+            margin-right: 5px;
+        }
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .btn-cancel {
+            background-color: #6c757d;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .btn-cancel i {
+            margin-right: 5px;
+        }
+        .btn-cancel:hover {
+            background-color: #5a6268;
+        }
+        .button-spacing {
+            margin-right: 80px; /* Adjust the spacing as needed */
+        }
+    </style>
+</head>
+<body class="ticket-booking-page">
+    <br><br><br>
+    <div class="container ticket-booking-container">
+        <h2>Ticket Booking</h2>
+        <form id="bookingForm" class="ticket-booking-form" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="service_id" value="{{ service.id }}">
+            <div class="form-group">
+                <label for="txt_date">For Date:</label>
+                <input type="date" class="form-control" name="txt_date" id="txt_date" min="{{ today_date }}" value="{{ today_date }}" required>
+            </div>
+            <div class="form-group">
+                <label for="txt_startpoint">Start Point:</label>
+                <input type="text" class="form-control" name="txt_startpoint" id="txt_startpoint" value="{{ service.services_startpoint }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="txt_endpoint">End Point:</label>
+                <input type="text" class="form-control" name="txt_endpoint" id="txt_endpoint" value="{{ service.services_endpoint }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="txt_time">Start Time:</label>
+                <input type="text" class="form-control" name="txt_time" id="txt_time" value="{{ service.assignboat_starttime }}" readonly>
+            </div>
+            <div class="form-group">
+                <label for="txt_number_adults">Adult Count:</label>
+                <input type="number" class="form-control" name="txt_number_adults" id="txt_number_adults"  min="0" max="99" step="1" oninput="validateInput(this)">
+                <small id="adultsError" class="form-text text-danger" style="display:none;">Please enter a valid positive whole number (maximum 2 digits).</small>
+            </div>
+            <div class="form-group">
+                <label for="txt_number_children">Children Count:</label>
+                <input type="number" class="form-control" name="txt_number_children" id="txt_number_children"  value="0" min="0" max="99" step="1" oninput="validateInput(this)">
+                <small id="childrenError" class="form-text text-danger" style="display:none;">Please enter a valid positive whole number (maximum 2 digits) .</small>
+            </div>
+            <div class="form-group">
+                <label for="txt_amount">Book Amount:</label>
+                <input type="text" class="form-control" name="txt_amount" id="txt_amount" readonly>
+            </div>
+            <br>
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-submit">
+                    <i class="fas fa-check"></i> Submit
+                </button>
+                <button type="reset" class="btn btn-cancel" onclick="window.location.href='{% url 'WebUser:service_detail' %}'">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+    <br><br>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Set today's date as the default and disable past dates
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("txt_date").setAttribute('min', today);
+        document.getElementById("txt_date").value = today;
+
+        function validateInput(inputField) {
+            var value = inputField.value;
+            var errorField = inputField.id === 'txt_number_adults' ? document.getElementById('adultsError') : document.getElementById('childrenError');
+
+            if (value === "" || isNaN(value) || parseInt(value) < 0 || parseInt(value) > 99) {
+                inputField.classList.add('is-invalid');
+                errorField.style.display = 'block';
+
+            } else {
+                inputField.classList.remove('is-invalid');
+                errorField.style.display = 'none';
+            }
+        }
+
+        // AJAX request for rate calculation
+        $('#txt_number_adults, #txt_number_children').on('input', function() {
+            var adults = $('#txt_number_adults').val();
+            var children = $('#txt_number_children').val();
+            var service_id = $('input[name="service_id"]').val();
+
+            if (adults !== "" && children !== "") {
+                $.ajax({
+                    url: "{% url 'WebUser:Ajaxrate' %}",
+                    data: {
+                        adults: adults,
+                        children: children,
+                        service_id: service_id
+                    },
+                    success: function(data) {
+                        $('#txt_amount').val(data.rate);
+                    }
+                });
+            }
+        });
+
+        // Handle form submission
+        $('#bookingForm').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'WebUser:TicketBooking' %}",
+                data: $(this).serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Booking Successful',
+                            text: "Do you want to proceed with payment?",
+                            icon: 'success',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes',
+                            cancelButtonText: 'No'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = "{% url 'WebUser:payment_section' %}?booking_id=" + response.booking_id;
+                            } else {
+                                window.location.href = "{% url 'WebUser:service_detail' %}";
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire('Oops...', 'Something went wrong!', 'error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

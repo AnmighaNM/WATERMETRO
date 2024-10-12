@@ -1,0 +1,174 @@
+{% extends 'User/HomePage.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booked Tickets</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Custom styles for View Tickets page */
+        body {
+            background: #f0f2f5;
+        }
+        #tickets-container {
+            margin: 50px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 95%;
+            max-width: 100%;
+        }
+        #tickets-table {
+            width: 100%;
+            margin: auto;
+        }
+        #tickets-table th, #tickets-table td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 15px;
+        }
+        #tickets-table th {
+            background-color: #6c757d;
+            color: #ffffff;
+        }
+        #tickets-table tr:hover {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        #tickets-table td a.btn-make-payment {
+            cursor: pointer;
+            text-decoration: none;
+        }
+        #tickets-table td a.btn-make-payment:hover {
+            background-color: #c3e6cb;
+            color: #155724;
+        }
+        #tickets-table td a.btn-make-payment {
+            font-size: 12px;
+            border-radius: 20px;
+            padding: 6px 12px;
+            background-color: #d4edda;
+            color: #155724;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #tickets-table tr:hover td {
+            cursor: pointer;
+        }
+        .status-not-payed {
+            color: red;
+            font-weight: bold;
+        }
+        .btn-cancel-booking {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .btn-cancel-booking:hover {
+            background-color: #f5c6cb;
+        }
+    </style>
+</head>
+<body><br><br><br>
+    <div id="tickets-container" class="container-fluid">
+        <h1 class="text-center">Booked Tickets</h1>
+        <table id="tickets-table" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>SL No</th>
+                    <th>Ticket Number</th>
+                    <th>Date</th>
+                    <th>Adults Count</th>
+                    <th>Children Count</th>
+                    <th>Amount(Rs.)</th>
+                    <th>Service Start Point</th>
+                    <th>Service Start Time</th>
+                    <th>Service End Point</th>
+                    <th>Service End Time</th>
+                    <th>Boat Name</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in booking %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.ticket_number }}</td>
+                    <td>{{ item.date }}</td>
+                    <td>{{ item.adults_count }}</td>
+                    <td>{{ item.childrens_count }}</td>
+                    <td>{{ item.book_amount }}</td>
+                    <td>{{ item.service.services_startpoint.place_name }}</td>
+                    <td>{{ item.service.assignboat_starttime }}</td>
+                    <td>{{ item.service.services_endpoint.place_name }}</td>
+                    <td>{{ item.service_end_time }}</td>
+                    <td>
+                        {% if item.service.assignboat_boat %}
+                        {{ item.service.assignboat_boat.boat_name }}
+                        {% else %}
+                        <span style="color: red;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.payment %}
+                        <span class="status-payed">Completed</span>
+                        {% else %}
+                        <span class="status-not-payed">Pending</span>
+                        <a href="{% url 'WebUser:payment_section' %}?booking_id={{ item.id }}" class="btn btn-make-payment">
+                            <button > <i class="fas fa-credit-card"></i> Make Payment</button>
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not item.payment_id %}
+                        <button class="btn-cancel-booking" onclick="confirmCancel('{{ item.id }}')"><i class="fas fa-times"></i> Cancel</button>
+                        {% elif item.payment_id and item.payment != 2 and item.payment != 3 %}
+                        <button class="btn-cancel-booking" onclick="confirmCancel('{{ item.id }}')"><i class="fas fa-times"></i> Cancel</button>
+                        {% elif item.payment == 2 %}
+                        <span class="text-danger">Canceled</span>
+                        {% elif item.payment == 3 %} 
+                        <span class="text-danger">Refunded Rs.{{ item.refund_amount_display }}</span>
+                        {% endif %}
+                    </td>   
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="13" class="text-center">No Tickets Booked.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div><br>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        function confirmCancel(bookingId) {
+            Swal.fire({
+                title: 'Are you sure to cancel the booking?',
+                text: "This action cannot be undone!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{% url "WebUser:cancel_booking" %}?booking_id=' + bookingId;
+                }
+            })
+        }
+    </script>
+</body>
+</html>
+{% endblock content %}

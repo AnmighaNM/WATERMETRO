@@ -1,0 +1,136 @@
+{% extends 'User/HomePage.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: #f0f2f5;
+        }
+        .profile-container {
+            margin-top: 50px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-header img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            border: 4px solid #007bff;
+        }
+        .profile-header h2 {
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #333;
+        }
+        .profile-header .btn {
+            margin-top: 10px;
+            font-size: 14px;
+            border-radius: 20px;
+        }
+        .profile-body {
+            padding: 50px;
+            text-align: left;
+        }
+        .profile-body .row {
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .profile-body label {
+            font-weight: bold;
+        }
+        .profile-body p {
+            margin-bottom: 0;
+            color: #555;
+        }
+        .btn-edit {
+            font-size: 14px;
+            color: #007bff;
+        }
+        .btn-edit:hover {
+            text-decoration: underline;
+        }
+        .btn-icon {
+            font-size: 14px;
+            margin: 5px;
+        }
+        .btn-icon i {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body><br><br><br>
+    <div class="container profile-container">
+        <div class="profile-header">
+            <img src="{{ user1.user_photo.url }}" alt="Profile Photo">
+            <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+            <a href="{% url 'WebUser:EditProfile' %}" class="btn btn-outline-primary btn-icon">
+                <i class="fas fa-user-edit"></i> Edit Profile
+            </a>
+            <a href="{% url 'WebUser:ChangePassword' %}" class="btn btn-outline-secondary btn-icon">
+                <i class="fas fa-lock"></i> Change Password
+            </a>
+        </div>
+        <div class="profile-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <label>First Name</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ user.first_name }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Last Name</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ user.last_name }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Email</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ user.email }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Phone</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ user1.user_contact }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Address</label>
+                </div>
+                <div class="col-md-8">
+                    <p>{{ user1.user_address }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock content %}

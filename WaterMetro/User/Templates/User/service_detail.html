@@ -1,0 +1,120 @@
+{% extends 'User/HomePage.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Unique styles for the Service Details page */
+        body {
+            background-color: #f0f2f5; /* Apply background color to the whole page */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .service-details-page {
+            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+        }
+        .service-details-container {
+            margin-top: 50px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .service-details-container h1 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+        .service-details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .service-details-table th, .service-details-table td {
+            border: 1px solid #dddddd;
+            padding: 12px;
+            text-align: left;
+            vertical-align: middle;
+            transition: background-color 0.3s, font-size 0.3s; /* Smooth transition for background and font-size */
+        }
+        .service-details-table th {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        .service-details-table tbody tr {
+            transition: background-color 0.3s, font-size 0.3s; /* Smooth transition for background and font-size */
+        }
+        .service-details-table tbody tr:hover {
+            background-color: #e0e0e0; /* Lighter color on hover */
+            font-size: 1.1em; /* Slightly larger text on hover */
+        }
+        .btn-book {
+            font-size: 14px;
+            border-radius: 20px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+        }
+        .btn-book i {
+            margin-right: 5px;
+        }
+        .btn-book:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body><br><br><br><br><br><br>
+    <div class="service-details-page">
+        <div class="container service-details-container">
+            <h1>Active Services</h1>
+            <table class="table table-striped service-details-table">
+                <thead>
+                    <tr>
+                        <th>Start Point</th>
+                        <th>Start Time</th>
+                        <th>End Point</th>
+                        <th>End Time</th>
+                        <th>Rate (Rs.)</th>
+                        <th>Available seats</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in services_with_end_time %}
+                        <tr>
+                            <td>{{ item.service.services_startpoint }}</td>
+                            <td>{{ item.service.assignboat_starttime }}</td>
+                            <td>{{ item.service.services_endpoint }}</td>
+                            <td>{{ item.end_time }}</td>
+                            <td>{{ item.service.rate }}</td>
+                            <td>{{ item.available_seats }}</td>
+                            <td>
+                                <form action="{% url 'WebUser:TicketBooking' %}" method="get">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="service_id" value="{{ item.service.id }}">
+                                    <button type="submit" class="btn btn-primary btn-book">
+                                        <i class="fas fa-ticket-alt"></i> Book Ticket
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No active services available.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock content %}
+</body>
+</html>
