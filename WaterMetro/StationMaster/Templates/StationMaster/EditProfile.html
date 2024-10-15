@@ -3,17 +3,15 @@
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <!-- Include Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>Edit User Profile</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body {
             background: #f0f2f5;
@@ -48,116 +46,210 @@
             font-size: 14px;
             border-radius: 20px;
         }
-        .profile-details {
-            text-align: left; /* Center the profile details */
-            padding-left: 220px;
+        .profile-body {
+            padding: 50px;
+            text-align: left;
         }
-        .profile-details .row {
+        .profile-body .row {
             margin-bottom: 15px;
+            justify-content: center;
         }
-        .profile-details label {
+        .profile-body label {
             font-weight: bold;
         }
-        .profile-details p {
+        .profile-body p {
             margin-bottom: 0;
             color: #555;
         }
-        .form-buttons {
-            text-align: center; /* Center buttons */
-            margin-top: 20px;
-        }
-        .form-buttons .btn {
+        .btn-edit {
             font-size: 14px;
-            border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 3D effect for buttons */
+            color: #007bff;
         }
-        .btn-update {
-            background-color: #007bff;
-            border-color: #007bff;
+        .btn-edit:hover {
+            text-decoration: underline;
         }
-        .btn-update:hover {
-            background-color: #0056b3;
-            border-color: #004085;
+        .btn-icon {
+            font-size: 14px;
+            margin: 5px;
         }
-        .btn-cancel {
-            background-color: #6c757d;
-            border-color: #6c757d;
-        }
-        .btn-cancel:hover {
-            background-color: #5a6268;
-            border-color: #4e555b;
+        .btn-icon i {
+            margin-right: 5px;
         }
     </style>
 </head>
-<body>
-    <div class="content-wrapper">
-        <div class="pcoded-content">
-            <div class="pcoded-inner-content"><br><br>
-                <div class="main-body">
-                    <div class="page-wrapper">
-    <h2 class="text-center form-header">Edit Profile</h2>
+<body><br><br><br>
     <div class="container profile-container">
         <div class="profile-header">
             <img src="{{ master.master_photo.url }}" alt="Profile Photo">
-            
+            <h2>{{ masterdata.first_name }} {{ masterdata.last_name }}</h2>
         </div>
-
-        <div class="container form-container">
-            
-            <form action="" method="post">
+        <div class="profile-body">
+            <form id="editProfileForm" method="post">
                 {% csrf_token %}
-                <div class="form-group row">
-                    <label for="txt_name" class="col-sm-2 col-form-label">First Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="txt_name" name="txt_name" value="{{ masterdata.first_name }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>First Name</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="txt_name" name="txt_name" value="{{ masterdata.first_name }}" onblur="validateName()">
+                        <span id="nameError" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="txt_lastname" class="col-sm-2 col-form-label">Last Name</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="txt_lastname" name="txt_lastname" value="{{ masterdata.last_name }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Last Name</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="txt_lastname" name="txt_lastname" value="{{ masterdata.last_name }}" onblur="validateName()">
+                        <span id="lnameError" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="txt_contact" class="col-sm-2 col-form-label">Contact</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="txt_contact" maxlength="10" name="txt_contact" value="{{ master.master_contact }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Email</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="txt_email" name="txt_email" value="{{ masterdata.email }}" onblur="validateEmail()">
+                        <span id="emailError" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="txt_email" class="col-sm-2 col-form-label">Email</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="txt_email" name="txt_email" value="{{ masterdata.email }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Phone</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="txt_contact" maxlength="10" name="txt_contact" value="{{ master.master_contact }}" onblur="validatePhone()">
+                        <span id="phoneError" class="text-danger"></span>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="txt_address" class="col-sm-2 col-form-label">Address</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="txt_address" name="txt_address" value="{{ master.master_address }}">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Address</label>
                     </div>
-                </div>
-                <div class="form-buttons">
-                    <button type="submit" class="btn btn-update">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" id="txt_address" name="txt_address" value="{{ master.master_address }}" onblur="validateAddress()">
+                        <span id="addressError" class="text-danger"></span>
+                    </div>
+                </div><br>
+                <div class="form-buttons" align="center">
+                    <button type="submit" class="btn btn-primary btn-icon">
                         <i class="fas fa-save"></i> Update
-                    </button>&nbsp;&nbsp;&nbsp;&nbsp;
-                    <button type="reset" class="btn btn-cancel" onclick="window.location.href='{% url 'WebStationMaster:MyProfile' %}'">
+                    </button>
+                    <button type="reset" class="btn btn-secondary btn-icon" onclick="window.location.href='{% url 'WebStationMaster:MyProfile' %}'">
                         <i class="fas fa-times"></i> Cancel
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
-</div>
-</div>
-</div>
-    
 
-    <!-- Include Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- SweetAlert Script -->
+    <script>
+        $(document).ready(function() {
+            {% if profile_updated %}
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Your profile has been updated successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            {% endif %}
+        });
+
+        // Validation Functions
+        function validateName() {
+            const name = $('#txt_name').val();
+            const lastname = $('#txt_lastname').val();
+            const regex = /^[a-zA-Z\s]{3,}$/;
+            let isValid = true;
+            if (!regex.test(name)) {
+                $('#nameError').text('First name must contain only letters and spaces, and be at least 3 characters long.');
+                isValid = false;
+            } else {
+                $('#nameError').text('');
+            }
+            if (!regex.test(lastname)) {
+                $('#lnameError').text('Last name must contain only letters and spaces, and be at least 3 characters long.');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function validateEmail() {
+            const email = $('#txt_email').val();
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!regex.test(email)) {
+                $('#emailError').text('Please enter a valid email address.');
+                return false;
+            } else {
+                $('#emailError').text('');
+                return true;
+            }
+        }
+
+        function validatePhone() {
+            const phone = $('#txt_contact').val();
+            const regex = /^[6-9]\d{9}$/;
+            if (!regex.test(phone)) {
+                $('#phoneError').text('Phone number must start with 6, 7, 8, or 9 and contain exactly 10 digits.');
+                return false;
+            } else {
+                $('#phoneError').text('');
+                return true;
+            }
+        }
+
+        function validateAddress() {
+            const address = $('#txt_address').val();
+            const regex = /^[a-zA-Z0-9\s.,]{4,}$/;
+            if (!regex.test(address)) {
+                $('#addressError').text('Address must be at least 4 characters long and can contain letters, numbers, periods, and commas.');
+                return false;
+            } else {
+                $('#addressError').text('');
+                return true;
+            }
+        }
+
+        // AJAX Validation and Form Submission
+        $('#editProfileForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // Trigger validation functions
+            const isValidName = validateName();
+            const isValidEmail = validateEmail();
+            const isValidPhone = validatePhone();
+            const isValidAddress = validateAddress();
+
+            // Check for errors
+            if (isValidName && isValidEmail && isValidPhone && isValidAddress) {
+                // No errors, submit the form via AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "WebStationMaster:EditProfile" %}',
+                    data: $(this).serialize(),
+                    success: function() {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Your profile has been updated successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            window.location.href = '{% url "WebStationMaster:MyProfile" %}';
+                        });
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'There was an issue updating your profile. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                });
+            }
+        });
+    </script>
 </body>
-
 </html>
-{% endblock content %}
+{% endblock %}

@@ -66,7 +66,7 @@ def changepassword(request):
                 user1.set_password(newpass)  # Use set_password to hash the new password
                 user1.save()
                 msg = "Password changed successfully."
-                return render(request, 'StationMaster/MyProfile.html', {'msg': msg, 'masterdata':master,'master':user1})
+                return render(request, 'Guest/Login.html')
             else:
                 msg = "New password and confirm password do not match."
                 return render(request, 'StationMaster/ChangePassword.html', {'msg': msg, 'masterdata':master,'master':user1})

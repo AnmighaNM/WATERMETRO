@@ -159,12 +159,20 @@
         // Validation Functions
         function validateName() {
             const name = $('#txt_name').val();
+            const lastname = $('#txt_lastname').val();
             const regex = /^[a-zA-Z\s]{3,}$/;
+            let isValid = true;
             if (!regex.test(name)) {
-                $('#nameError').text('Name must contain only letters and spaces, and be at least 3 characters long.');
+                $('#nameError').text('First name must contain only letters and spaces, and be at least 3 characters long.');
+                isValid = false;
             } else {
                 $('#nameError').text('');
             }
+            if (!regex.test(lastname)) {
+                $('#nameError').text('Last name must contain only letters and spaces, and be at least 3 characters long.');
+                isValid = false;
+            }
+            return isValid;
         }
 
         function validateEmail() {
@@ -172,8 +180,10 @@
             const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!regex.test(email)) {
                 $('#emailError').text('Please enter a valid email address.');
+                return false;
             } else {
                 $('#emailError').text('');
+                return true;
             }
         }
 
@@ -182,8 +192,10 @@
             const regex = /^[6-9]\d{9}$/;
             if (!regex.test(phone)) {
                 $('#phoneError').text('Phone number must start with 6, 7, 8, or 9 and contain exactly 10 digits.');
+                return false;
             } else {
                 $('#phoneError').text('');
+                return true;
             }
         }
 
@@ -192,24 +204,25 @@
             const regex = /^[a-zA-Z0-9\s.,]{4,}$/;
             if (!regex.test(address)) {
                 $('#addressError').text('Address must be at least 4 characters long and can contain letters, numbers, periods, and commas.');
+                return false;
             } else {
                 $('#addressError').text('');
+                return true;
             }
         }
 
-        // Handle form submission with AJAX
+        // AJAX Validation and Form Submission
         $('#editProfileForm').on('submit', function(e) {
             e.preventDefault();
 
             // Trigger validation functions
-            validateName();
-            validateEmail();
-            validatePhone();
-            validateAddress();
+            const isValidName = validateName();
+            const isValidEmail = validateEmail();
+            const isValidPhone = validatePhone();
+            const isValidAddress = validateAddress();
 
             // Check for errors
-            if ($('#nameError').text() === '' && $('#emailError').text() === '' && 
-                $('#phoneError').text() === '' && $('#addressError').text() === '') {
+            if (isValidName && isValidEmail && isValidPhone && isValidAddress) {
                 // No errors, submit the form via AJAX
                 $.ajax({
                     type: 'POST',
@@ -239,4 +252,4 @@
     </script>
 </body>
 </html>
-{% endblock content %}
+{% endblock %}
