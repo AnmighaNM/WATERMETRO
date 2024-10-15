@@ -34,9 +34,9 @@
                                         {% for station_master in station_masters %}
                                         <tr>
                                             <th scope="row">{{ forloop.counter }}</th>
-                                            <td>{{ station_master.master_user.first_name }} {{ station_master.master_user.last_name }}</td>
+                                            <td>{{ station_master.user.first_name }} {{ station_master.user.last_name }}</td>
                                             <td>{{ station_master.master_contact }}</td>
-                                            <td>{{ station_master.master_user.email }}</td>
+                                            <td>{{ station_master.user.email }}</td>
                                             <td>{{ station_master.master_gender }}</td>
                                             <td>{{ station_master.master_place.place_name }}</td>
                                             <td><img src="{{ station_master.master_photo.url }}" alt="Photo" class="img-fluid rounded-circle" width="50"></td>

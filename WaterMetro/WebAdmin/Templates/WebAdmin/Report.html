@@ -47,6 +47,15 @@
     <div class="container">
         <table class="table">
             <tr>
+                <td>Ticket Type</td>
+                <td>
+                    <select class="form-control" id="txt_ticket" onchange="getReport()">
+                        <option value="">....Select....</option>
+                        <option value="0">All</option>
+                        <option value="1">Public Transport Boat Services</option>
+                        <option value="2">Tourism and Recreational Boat Services</option>
+                    </select>
+                </td>
                 <td>From Date</td>
                 <td><input type="date" class="form-control" id="txt_fdate" onchange="getReport()"></td>
                 <td>To Date</td>
@@ -73,78 +82,110 @@
                     <th>Adult Count</th>
                     <th>Children Count</th>
                     <th>Amount</th>
-                    <th>Ticket number</th>
+                    <th>Ticket Number</th>
                     <th>User Name</th>
                     <th>Boat</th>
                     <th>Action</th>
                 </tr>
-                {% for item in booking %}
+                {% for item in combined_list %}
                 <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ item.date }}</td>
-                    <td>{{ item.adults_count }}</td>
-                    <td>{{ item.childrens_count }}</td>
-                    <td>{{ item.book_amount }}</td>
-                    <td>{{ item.ticket_number }}</td>
-                    <td>{{ item.user.first_name }} {{ item.user.last_name }}</td>
+                    <td>{{ item.counter }}</td>
+                    {% if item.type == 'booking' %}
+                    <td>{{ item.data.date }}</td>
+                    <td>{{ item.data.adults_count }}</td>
+                    <td>{{ item.data.childrens_count }}</td>
+                    <td>{{ item.data.book_amount }}</td>
+                    <td>{{ item.data.ticket_number }}</td>
+                    <td>{{ item.data.user.first_name }} {{ item.data.user.last_name }}</td>
                     <td>
-                        {% if item.assign %}
-                        {{ item.assign.boat.boat_name }}
+                        {% if item.data.service %}
+                        {{ item.data.service.assignboat_boat.boat_name }}
                         {% else %}
                         <span style="color: red;">N/A</span>
                         {% endif %}
                     </td>
                     <td>
-                        {% if item.payment == 0 %}
+                        {% if item.data.payment == 0 %}
                         <span style="color: red;">Not Payed</span>
-                        {% elif item.payment == 1 %}
+                        {% elif item.data.payment == 1 %}
                         <span style="color: green;">Payed</span>
-                        {% elif item.payment == 2 %}
+                        {% elif item.data.payment == 2 %}
                         <span style="color: green;">Canceled & Not Refunded</span>
-                        {% elif item.payment == 3 %}
+                        {% elif item.data.payment == 3 %}
                         <span style="color: red;">Canceled</span>
-                        {% elif item.payment == 4 %}
+                        {% elif item.data.payment == 4 %}
                         <span style="color: red;">Refunded</span>
                         {% else %}
                         Error
                         {% endif %}
                     </td>
+                    {% elif item.type == 'eventbooking' %}
+                    <td>{{ item.data.event_date }}</td>
+                    <td>{{ item.data.adult_count }}</td>
+                    <td>{{ item.data.children_count }}</td>
+                    <td>{{ item.data.refund_amount }}</td>
+                    <td>{{ item.data.event_number }}</td>
+                    <td>{{ item.data.user.first_name }} {{ item.data.user.last_name }}</td>
+                    <td>
+                        {% if item.data.assign %}
+                        {{ item.data.assign.boat_name }}
+                        {% else %}
+                        <span style="color: red;">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.data.status == 0 %}
+                        <span style="color: red;">Not Payed</span>
+                        {% elif item.data.status == 1 %}
+                        <span style="color: green;">Payed</span>
+                        {% elif item.data.status == 2 %}
+                        <span style="color: green;">Canceled & Not Refunded</span>
+                        {% elif item.data.status == 3 %}
+                        <span style="color: red;">Cancelled</span>
+                        {% elif item.data.status == 4 %}
+                        <span style="color: red;">Refunded</span>
+                        {% else %}
+                        Error
+                        {% endif %}
+                    </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
 
-     <!-- Include jQuery -->
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-     <script>
-         function getReport() {
-             var status = document.getElementById('txt_con').value;
-             var fdate = document.getElementById('txt_fdate').value;
-             var tdate = document.getElementById('txt_tdate').value;
-             var url = "{% url 'WebAdmin:AjaxReport' %}";
- 
-             $.ajax({
-                 url: url,
-                 type: 'GET',
-                 data: { status: status, fdate: fdate, tdate: tdate },
-                 success: function (data) {
-                     $("#result").html(data);
-                 },
-                 error: function (xhr, errmsg, err) {
-                     console.log("AJAX request failed: " + errmsg);
-                 }
-             });
-         }
- 
-         function getPrint(bill) {
-             var printContent = document.getElementById(bill).innerHTML;
-             var originalContent = document.body.innerHTML;
-             document.body.innerHTML = printContent;
-             window.print();
-             document.body.innerHTML = originalContent;
-         }
-     </script>
- </body>
- </html>
- {% endblock content %}
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        function getReport() {
+            var ticketType = document.getElementById('txt_ticket').value;
+            var status = document.getElementById('txt_con').value;
+            var fdate = document.getElementById('txt_fdate').value;
+            var tdate = document.getElementById('txt_tdate').value;
+            var url = "{% url 'WebStationMaster:AjaxReport' %}";
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: { ticketType: ticketType, status: status, fdate: fdate, tdate: tdate },
+                success: function (data) {
+                    $("#result").html(data);
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log("AJAX request failed: " + errmsg);
+                }
+            });
+        }
+
+        function getPrint(bill) {
+            var printContent = document.getElementById(bill).innerHTML;
+            var originalContent = document.body.innerHTML;
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+        }
+    </script>
+</body>
+</html>
+{% endblock content %}

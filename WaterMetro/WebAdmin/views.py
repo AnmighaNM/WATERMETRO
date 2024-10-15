@@ -9,14 +9,20 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required 
 
 # Create your views here.
 
 @never_cache
+@login_required
 def homepage(request):
+    user1 = request.user 
     return render(request,'WebAdmin/Homepage.html')
 
+@never_cache
+@login_required
 def district(request):
+    user1 = request.user 
     disobj = tbl_district.objects.all()
 
     if request.method == "POST":
@@ -52,7 +58,10 @@ def toggle_status(request, did):
     district.save()
     return redirect('WebAdmin:District')
 
+@never_cache
+@login_required
 def place(request):
+    user1 = request.user 
     # Fetch only active districts
     disdata = tbl_district.objects.filter(status=1)
     placedata = tbl_place.objects.all()
@@ -85,7 +94,10 @@ def toggle_place_status(request, pid):
     place.save()
     return redirect('WebAdmin:Place')
 
+@never_cache
+@login_required
 def boat(request):
+    user1 = request.user 
     BoatData = list(tbl_boat.objects.values())
 
     if request.method == "POST":
@@ -127,6 +139,8 @@ def boat(request):
     else:
         return render(request, 'WebAdmin/Boat.html', {'Data': BoatData})
 
+@never_cache
+@login_required
 def update_boat(request, did):
     updata = get_object_or_404(tbl_boat, id=did)
     BoatData = list(tbl_boat.objects.values())
@@ -162,8 +176,10 @@ def toggle_boat_status(did):
     boat.save()
     return redirect('WebAdmin:Boat')
 
-
+@never_cache
+@login_required
 def stationmaster_registration(request):
+    user1 = request.user 
     active_places = tbl_place.objects.filter(status=1)
 
     if request.method == "POST":
@@ -224,8 +240,10 @@ def stationmaster_registration(request):
 
     return render(request, 'WebAdmin/StationMasterRegistration.html', {'Ddata': active_places})
 
+@never_cache
+@login_required
 def station_master_list(request):
-    station_masters = tbl_stationmaster.objects.select_related('master_user').all()  # Fetch all tbl_stationmaster records
+    station_masters = tbl_stationmaster.objects.select_related('user').all()  # Fetch all tbl_stationmaster records
     return render(request, 'WebAdmin/StationMasterList.html', {'station_masters': station_masters})
 
 def toggle_station_master_status(request):
@@ -243,7 +261,10 @@ def toggle_station_master_status(request):
             return JsonResponse({'success': False, 'message': 'Station Master not found'})
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
+@never_cache
+@login_required
 def event_type(request):
+    user1 = request.user 
     eventobj = tbl_eventtype.objects.all()
     if request.method == "POST":
         eventtype = request.POST.get("txt_eventtype")
@@ -258,6 +279,8 @@ def event_type(request):
     else:
         return render(request, 'WebAdmin/EventType.html', {'Data': eventobj})
 
+@never_cache
+@login_required
 def update_eventtype(request, did):
     eventobj = tbl_eventtype.objects.all()
     updata = get_object_or_404(tbl_eventtype, id=did)
@@ -276,31 +299,97 @@ def update_eventtype(request, did):
     else:
         return render(request, 'WebAdmin/EventType.html', {'Data': eventobj, 'updata': updata})
 
-def toggle_eventtype_status(did):
+def toggle_eventtype_status(request, did):
     eventtype = get_object_or_404(tbl_eventtype, id=did)
     eventtype.status = 0 if eventtype.status == 1 else 1
     eventtype.save()
     return redirect('WebAdmin:EventType')
 
+@never_cache
+@login_required
 def report(request):
     booking = tbl_ticketbooking.objects.all()
-    return render(request, 'WebAdmin/Report.html', {"booking": booking})
+    eventbooking = tbl_eventbooking.objects.all()
+    combined_list = []
+    counter = 1
+    for item in booking:
+        combined_list.append({
+            'type': 'booking',
+            'data': item,
+            'counter': counter
+        })
+        counter += 1
+
+    # Add eventbooking items to combined list with a counter
+    for item in eventbooking:
+        combined_list.append({
+            'type': 'eventbooking',
+            'data': item,
+            'counter': counter
+        })
+        counter += 1
+    return render(request, 'WebAdmin/Report.html', {"combined_list": combined_list})
+
 
 def ajaxreport(request):
     # Get filter parameters from the request
     fdate = request.GET.get("fdate", "")
     tdate = request.GET.get("tdate", "")
     status = request.GET.get("status", "")
+    ticket_type = request.GET.get("ticketType", "")
 
-    # Filter booking data based on the provided parameters
-    booking = tbl_ticketbooking.objects.all()
+    # Initialize empty queryset
+    booking = tbl_ticketbooking.objects.none()
+    eventbooking = tbl_eventbooking.objects.none()
+    combined_list = []
+    counter = 1
+    # Filter based on ticket type
+    if ticket_type == "1":  # Public Transport Boat Services (ticket booking)
+        booking = tbl_ticketbooking.objects.all()
+        if fdate:
+            booking = booking.filter(date__gte=fdate)
+        if tdate:
+            booking = booking.filter(date__lte=tdate)
+        if status:
+            booking = booking.filter(payment=status)
 
-    if fdate:
-        booking = booking.filter(date__gte=fdate)
-    if tdate:
-        booking = booking.filter(date__lte=tdate)
-    if status:
-        booking = booking.filter(payment=status)
+    elif ticket_type == "2":  # Tourism and Recreational Boat Services (event booking)
+        eventbooking = tbl_eventbooking.objects.all()
+        if fdate:
+            eventbooking = eventbooking.filter(event_date__gte=fdate)
+        if tdate:
+            eventbooking = eventbooking.filter(event_date__lte=tdate)
+        if status:
+            eventbooking = eventbooking.filter(status=status)
 
+    else:  # Show both ticket and event bookings (All)
+        booking = tbl_ticketbooking.objects.all()
+        eventbooking = tbl_eventbooking.objects.all()
+        if fdate:
+            booking = booking.filter(date__gte=fdate)
+            eventbooking = eventbooking.filter(event_date__gte=fdate)
+        if tdate:
+            booking = booking.filter(date__lte=tdate)
+            eventbooking = eventbooking.filter(event_date__lte=tdate)
+        if status:
+            booking = booking.filter(payment=status)
+            eventbooking = eventbooking.filter(status=status)
+            
+    for item in booking:
+        combined_list.append({
+            'type': 'booking',
+            'data': item,
+            'counter': counter
+        })
+        counter += 1
+
+    # Add eventbooking items to combined list with a counter
+    for item in eventbooking:
+        combined_list.append({
+            'type': 'eventbooking',
+            'data': item,
+            'counter': counter
+        })
+        counter += 1
     # Render the filtered results in the AjaxReport template
-    return render(request, "WebAdmin/AjaxReport.html", {"booking": booking})
+    return render(request, "WebAdmin/AjaxReport.html", {"combined_list": combined_list})

@@ -14,7 +14,7 @@ import nltk
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from django.utils import timezone
 from django.db.models import Sum
-from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required  
 
 
 # Download required resources for NLTK
@@ -22,16 +22,20 @@ nltk.download('vader_lexicon')
 
 # Create your views here.
 
+@never_cache
+@login_required
 def homepage(request):
     return render(request, 'User/Homepage.html')
 
 @never_cache
+@login_required
 def myprofile(request):
     user1 = request.user
     user = Profile.objects.get(user=user1)
     return render(request, 'User/MyProfile.html', {'user': user1, 'user1': user})
 
 @never_cache
+@login_required
 def editprofile(request):
     user1 = request.user
     user = Profile.objects.get(user=user1)
@@ -50,6 +54,7 @@ def editprofile(request):
         return render(request, 'User/EditProfile.html', {'user': user1, 'user1': user, 'profile_updated': profile_updated})
 
 @never_cache
+@login_required
 def changepassword(request):
     user1 = request.user
     user = Profile.objects.get(user=user1)
@@ -77,6 +82,7 @@ def changepassword(request):
         return render(request, 'User/ChangePassword.html', {'user': user1, 'user1': user})
 
 @never_cache
+@login_required
 def service_detail(request):
     active_services = tbl_services.objects.filter(status=1)
     user1 = request.user
@@ -121,6 +127,7 @@ def service_detail(request):
     return render(request, 'User/service_detail.html', context)
 
 @never_cache
+@login_required
 def ticketbooking(request):
     user1 = request.user
     if request.method == "POST":
@@ -241,6 +248,7 @@ def payment_success(request):
     return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 @never_cache
+@login_required
 def viewticketbooking(request):
     user1 = request.user
     bookings = tbl_ticketbooking.objects.filter(user=user1)
@@ -263,6 +271,7 @@ def viewticketbooking(request):
     return render(request, "User/ViewTicketBooking.html", {"booking": bookings, 'user': user1})
 
 @never_cache
+@login_required
 def cancel_booking(request):
     booking_id = request.GET.get('booking_id')
     booking = get_object_or_404(tbl_ticketbooking, id=booking_id)
@@ -296,6 +305,7 @@ def analyze_sentiment(feedback_text):
 
 # Feedback submission view
 @never_cache
+@login_required
 def feedback_view(request):
     if request.method == "POST":
         title = request.POST.get('txt_title')
@@ -319,11 +329,13 @@ def feedback_view(request):
     return render(request, 'User/feedback.html', {'feedback_list': feedback_list})
 
 @never_cache
+@login_required
 def eventlist(request):
     event=tbl_eventtype.objects.all()
     return render(request,'User/EventList.html',{'event':event})
 
 @never_cache
+@login_required
 def eventbooking(request, did):
     if request.method == 'POST':
         # Extract data from the form
@@ -338,8 +350,8 @@ def eventbooking(request, did):
 
         # Validate adult count
         adults_count = request.POST.get("txt_number_adults")
-        if not adults_count.isdigit() or not (0 <= int(adults_count) <= 99):
-            return JsonResponse({'success': False, 'error': 'Invalid adult count. Please enter a number between 0 and 99.'})
+        if not adults_count.isdigit() or not (0 <= int(adults_count) <= 999):
+            return JsonResponse({'success': False, 'error': 'Invalid adult count. Please enter a number between 0 and 999.'})
 
         
         # Parse the duration string into hours and minutes (and seconds if present)
@@ -499,6 +511,7 @@ def payment_callback(request):
     return HttpResponseBadRequest("Invalid request method")
 
 @never_cache
+@login_required
 def vieweventbooking(request):
     user1 = request.user
     ticketdata=tbl_eventbooking.objects.filter(user=user1)
