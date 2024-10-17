@@ -323,8 +323,14 @@ def feedback_view(request):
         )
         feedback.save()
 
-        return render(request, 'User/feedback.html', {'message': 'Feedback submitted successfully!'})
+        # Pass success message after submission
+        feedback_list = Feedback.objects.filter(user=request.user)
+        return render(request, 'User/feedback.html', {
+            'message': 'Feedback submitted successfully!',
+            'feedback_list': feedback_list
+        })
 
+    # If GET request, display existing feedback
     feedback_list = Feedback.objects.filter(user=request.user)
     return render(request, 'User/feedback.html', {'feedback_list': feedback_list})
 

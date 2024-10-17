@@ -170,7 +170,7 @@ def update_boat(request, did):
     else:
         return render(request, 'WebAdmin/Boat.html', {'updata': updata, 'Data': BoatData})
 
-def toggle_boat_status(did):
+def toggle_boat_status(request, did):
     boat = get_object_or_404(tbl_boat, id=did)
     boat.status = 0 if boat.status == 1 else 1
     boat.save()
@@ -215,7 +215,7 @@ def stationmaster_registration(request):
 
             # Create station master profile linked to the user
             tbl_stationmaster.objects.create(
-                master_user=user,
+                user=user,
                 master_contact=contact,
                 master_gender=gender,
                 master_address=address,

@@ -358,7 +358,7 @@ def refund(request):
     # Ensure event_type_rate is numeric and calculate 80% refund amount
     try:
         event_type_rate = float(event_type_rate)
-        refund_amount = int(event_type_rate * 50 / 100 * 100)  # Convert to paise
+        refund_amount = int(event_type_rate * 80 / 100 * 100)  # Convert to paise
     except (ValueError, TypeError):
         return HttpResponseBadRequest("Invalid rate value")
 

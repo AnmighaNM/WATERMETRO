@@ -81,7 +81,7 @@
                     <th>Date</th>
                     <th>Adult Count</th>
                     <th>Children Count</th>
-                    <th>Amount</th>
+                    <th>Amount(INR)</th>
                     <th>Ticket Number</th>
                     <th>User Name</th>
                     <th>Boat</th>
@@ -123,7 +123,21 @@
                     <td>{{ item.data.event_date }}</td>
                     <td>{{ item.data.adult_count }}</td>
                     <td>{{ item.data.children_count }}</td>
-                    <td>{{ item.data.refund_amount }}</td>
+                    <td>
+                        {% if item.data.status == 0 %}
+                            {{ item.data.event_type.event_rate }}
+                        {% elif item.data.status == 1 %}
+                            {{ item.data.event_type.event_rate }}
+                        {% elif item.data.status == 2 %}
+                            {{ item.data.event_type.event_rate }}
+                        {% elif item.data.status == 3 %}
+                            {{ item.data.event_type.event_rate }}
+                        {% elif item.data.status == 4 %}
+                            {{ item.data.refund_amount }}
+                        {% else %}
+                        None
+                        {% endif %}
+                    </td>
                     <td>{{ item.data.event_number }}</td>
                     <td>{{ item.data.user.first_name }} {{ item.data.user.last_name }}</td>
                     <td>
