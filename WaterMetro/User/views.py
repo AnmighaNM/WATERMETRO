@@ -268,7 +268,9 @@ def viewticketbooking(request):
         if booking.refund_amount:
             booking.refund_amount_display = booking.refund_amount / 100
     
-    return render(request, "User/ViewTicketBooking.html", {"booking": bookings, 'user': user1})
+    today = timezone.now().date()
+    
+    return render(request, "User/ViewTicketBooking.html", {"booking": bookings, 'user': user1, 'today': today})
 
 @never_cache
 @login_required

@@ -146,7 +146,10 @@
                         
                         <!-- Reschedule Button -->
                         {% if item.status != 3 and item.status != 4 %}
-                            <button class="btn-reschedule-booking" onclick="showRescheduleModal('{{ item.id }}', '{{ item.event_date }}', '{{ item.event_starttime }}')"><i class="fas fa-calendar-alt"></i> Reschedule</button>
+                            <button class="btn-reschedule-booking" 
+                            onclick="showRescheduleModal('{{ item.id }}', '{{ item.event_date|date:"Y-m-d" }}', '{{ item.event_starttime|time:'H:i' }}')">
+                            <i class="fas fa-calendar-alt"></i> Reschedule
+                            </button>
                         {% endif %}
 
                     </td>                    
@@ -195,53 +198,53 @@
             })
         }
 
-            function showRescheduleModal(bookingId, defaultDate, defaultTime) {
-                Swal.fire({
-                    title: 'Reschedule Event',
-                    html: `
-                        <form id="reschedule-form">
-                            <label for="new_date">New Date:</label>
-                            <input type="date" id="new_date" name="new_date" class="swal2-input" value="${defaultDate}">
-                            <label for="new_time">New Time:</label>
-                            <input type="time" id="new_time" name="new_time" class="swal2-input" value="${defaultTime}">
-                        </form>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Save',
-                    preConfirm: () => {
-                        const newDate = document.getElementById('new_date').value;
-                        const newTime = document.getElementById('new_time').value;
-                        if (!newDate || !newTime) {
-                            Swal.showValidationMessage('Both date and time are required.');
-                            return false;
+        function showRescheduleModal(bookingId, availableDate, availableTime) {
+            const today = new Date().toISOString().split('T')[0];
+            Swal.fire({
+                title: 'Reschedule Event',
+                html: `
+                    <form id="reschedule-form">
+                        <label for="new_date">New Date:</label>
+                        <input type="date" id="new_date" name="new_date" class="swal2-input" value="${availableDate}" min="${today}" required onkeydown="return false;">
+                        <label for="new_time">New Time:</label>
+                        <input type="time" id="new_time" name="new_time" class="swal2-input" value="${availableTime}">
+                    </form>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Save',
+                preConfirm: () => {
+                    const newDate = document.getElementById('new_date').value;
+                    const newTime = document.getElementById('new_time').value;
+                    if (!newDate || !newTime) {
+                        Swal.showValidationMessage('Both date and time are required.');
+                        return false;
+                    }
+                    return { newDate: newDate, newTime: newTime };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Make an AJAX call to update the date and time in the backend
+                    $.ajax({
+                        url: '{% url "WebUser:reschedule_event" %}',
+                        type: 'POST',
+                        data: {
+                            'booking_id': bookingId,
+                            'new_date': result.value.newDate,
+                            'new_time': result.value.newTime,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            Swal.fire('Success', 'Event rescheduled successfully!', 'success').then(() => {
+                                window.location.reload();
+                            });
+                        },
+                        error: function(error) {
+                            Swal.fire('Error', 'Failed to reschedule the event. Try again later.', 'error');
                         }
-                        return { newDate: newDate, newTime: newTime };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Make an AJAX call to update the date and time in the backend
-                        $.ajax({
-                            url: '{% url "WebUser:reschedule_event" %}',
-                            type: 'POST',
-                            data: {
-                                'booking_id': bookingId,
-                                'new_date': result.value.newDate,
-                                'new_time': result.value.newTime,
-                                'csrfmiddlewaretoken': '{{ csrf_token }}'
-                            },
-                            success: function(response) {
-                                Swal.fire('Success', 'Event rescheduled successfully!', 'success').then(() => {
-                                    window.location.reload();
-                                });
-                            },
-                            error: function(error) {
-                                Swal.fire('Error', 'Failed to reschedule the event. Try again later.', 'error');
-                            }
-                        });
-                    }
-                });
-            }
-            </script>
+                    });
+                }
+            });
+        }        
     </script>
 </body>
 </html>

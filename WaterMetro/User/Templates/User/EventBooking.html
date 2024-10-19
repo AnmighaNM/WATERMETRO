@@ -81,7 +81,7 @@
             {% csrf_token %}
             <div class="form-group">
                 <label for="txt_date">For Date</label>
-                <input type="date" class="form-control" name="txt_date" min="{{ today_date }}" value="{{ today_date }}" id="txt_date" required>
+                <input type="date" class="form-control" name="txt_date" min="{{ today_date }}" value="{{ today_date }}" id="txt_date" required onkeydown="return false;">
             </div>
             <div class="form-group">
                 <label for="txt_title">Event Title</label>

@@ -78,7 +78,7 @@
             <input type="hidden" name="service_id" value="{{ service.id }}">
             <div class="form-group">
                 <label for="txt_date">For Date:</label>
-                <input type="date" class="form-control" name="txt_date" id="txt_date" min="{{ today_date }}" value="{{ today_date }}" required>
+                <input type="date" class="form-control" name="txt_date" id="txt_date" min="{{ today_date }}" required onkeydown="return false;">
             </div>
             <div class="form-group">
                 <label for="txt_startpoint">Start Point:</label>
@@ -94,13 +94,13 @@
             </div>
             <div class="form-group">
                 <label for="txt_number_adults">Adult Count:</label>
-                <input type="number" class="form-control" name="txt_number_adults" id="txt_number_adults"  min="0" max="99" step="1" oninput="validateInput(this)">
+                <input type="number" class="form-control" name="txt_number_adults" id="txt_number_adults" min="0" max="99" step="1" oninput="validateInput(this)">
                 <small id="adultsError" class="form-text text-danger" style="display:none;">Please enter a valid positive whole number (maximum 2 digits).</small>
             </div>
             <div class="form-group">
                 <label for="txt_number_children">Children Count:</label>
-                <input type="number" class="form-control" name="txt_number_children" id="txt_number_children"  value="0" min="0" max="99" step="1" oninput="validateInput(this)">
-                <small id="childrenError" class="form-text text-danger" style="display:none;">Please enter a valid positive whole number (maximum 2 digits) .</small>
+                <input type="number" class="form-control" name="txt_number_children" id="txt_number_children" value="0" min="0" max="99" step="1" oninput="validateInput(this)">
+                <small id="childrenError" class="form-text text-danger" style="display:none;">Please enter a valid positive whole number (maximum 2 digits).</small>
             </div>
             <div class="form-group">
                 <label for="txt_amount">Book Amount:</label>
@@ -122,11 +122,23 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Set today's date as the default and disable past dates
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById("txt_date").setAttribute('min', today);
-        document.getElementById("txt_date").value = today;
+        // Dynamically set the minimum date based on service start time
+        const serviceStartTimeString = "{{ service.assignboat_starttime }}"; // Example: '08:05:00'
+        const serviceStartTimeParts = serviceStartTimeString.split(':');
+        
+        const serviceStartTime = new Date();
+        serviceStartTime.setHours(parseInt(serviceStartTimeParts[0]), parseInt(serviceStartTimeParts[1]), 0); // Set to service start time
 
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(today.getDate() + 1); // Increment the day by 1
+
+        // Determine which date to set as minimum
+        const dateToSet = today > serviceStartTime ? tomorrow : today;
+        document.getElementById("txt_date").setAttribute('min', dateToSet.toISOString().split('T')[0]);
+        document.getElementById("txt_date").value = dateToSet.toISOString().split('T')[0];
+
+        // Function to validate input fields for adults and children
         function validateInput(inputField) {
             var value = inputField.value;
             var errorField = inputField.id === 'txt_number_adults' ? document.getElementById('adultsError') : document.getElementById('childrenError');
@@ -134,7 +146,6 @@
             if (value === "" || isNaN(value) || parseInt(value) < 0 || parseInt(value) > 99) {
                 inputField.classList.add('is-invalid');
                 errorField.style.display = 'block';
-
             } else {
                 inputField.classList.remove('is-invalid');
                 errorField.style.display = 'none';
@@ -184,6 +195,13 @@
                             } else {
                                 window.location.href = "{% url 'WebUser:service_detail' %}";
                             }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Booking Failed',
+                            text: response.error || 'Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
                         });
                     }
                 },
