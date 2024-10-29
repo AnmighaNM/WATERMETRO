@@ -26,7 +26,7 @@ urlpatterns = [
     path('Guest/',include(('Guest.urls', 'WebGuest'), namespace='WebGuest')),
     path('StationMaster/',include(('StationMaster.urls', 'WebStationMaster'), namespace='WebStationMaster')),
     path('User/', include(('User.urls', 'WebUser'), namespace='WebUser')),
-    # path('', guest_views.Index, name='index'), # Set the root URL to the index view
+    path('', guest_views.index, name='index'), # Set the root URL to the index view
 ]
 
 if settings.DEBUG:
