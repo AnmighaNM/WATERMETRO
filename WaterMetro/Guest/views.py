@@ -65,7 +65,7 @@ def index(request):
         'poor_percent': poor_percent,
     }
 
-    return redirect('WebGuest:Index')
+    return render(request, 'index.html', context)
 
 def login_view(request):
     if request.method == 'POST':
@@ -89,7 +89,7 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid email or password.')
     
-    return render(request, 'Guest/Login.html')  # Make sure the path matches your template
+    return render(request, 'Login.html')  # Make sure the path matches your template
 
 def forgetpassword(request):
     if request.method=="POST":
@@ -104,14 +104,14 @@ def forgetpassword(request):
         )
         return redirect("WebGuest:Verification")
     else:
-        return render(request,"Guest/ForgetPassword.html")
+        return render(request,"ForgetPassword.html")
 
 def OtpVerification(request):
     if request.method=="POST":
         otp=int(request.session["otp"])
         if int(request.POST.get('txtotp'))==otp:
             return redirect("WebGuest:Create")
-    return render(request,"Guest/OTPVerification.html")
+    return render(request,"OTPVerification.html")
 
 def CreateNewPass(request):
     User = get_user_model()
@@ -126,15 +126,15 @@ def CreateNewPass(request):
                 messages.success(request, "Password updated successfully.")
                 return redirect("WebGuest:Login")
     else:       
-        return render(request,"Guest/CreateNewPassword.html")
+        return render(request,"CreateNewPassword.html")
 
 def ajaxemail(request):
     User = get_user_model()
     usercount=User.objects.filter(user_email=request.GET.get("email")).count() 
     if usercount>0:
-        return render(request,"Guest/Ajaxemail.html",{'mess':1})
+        return render(request,"Ajaxemail.html",{'mess':1})
     else:
-         return render(request,"Guest/Ajaxemail.html")
+         return render(request,"Ajaxemail.html")
 
 def user_registration(request):
     if request.method == "POST":
@@ -153,16 +153,16 @@ def user_registration(request):
         # Check if the username already exists
         if User.objects.filter(username=email).exists():
             messages.error(request, "Username already exists.")
-            return render(request, "Guest/UserRegistration.html")
+            return render(request, "UserRegistration.html")
         
         # Optionally, check if the email already exists
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists.")
-            return render(request, "Guest/UserRegistration.html")
+            return render(request, "UserRegistration.html")
         
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
-            return render(request, "Guest/UserRegistration.html")
+            return render(request, "UserRegistration.html")
 
         # Server-side validation (additional checks)
         try:
@@ -173,10 +173,10 @@ def user_registration(request):
             # Check for duplicates
             if User.objects.filter(email=email).exists():
                 messages.error(request, "Email already exists.")
-                return render(request, "Guest/UserRegistration.html")
+                return render(request, "UserRegistration.html")
             if Profile.objects.filter(user_contact=contact).exists():
                 messages.error(request, "Contact number already exists.")
-                return render(request, "Guest/UserRegistration.html")
+                return render(request, "UserRegistration.html")
 
             # Create the user
             user = User.objects.create_user(
@@ -205,7 +205,7 @@ def user_registration(request):
         except ValidationError as e:
             messages.error(request, str(e))
 
-    return render(request, "Guest/UserRegistration.html")
+    return render(request, "UserRegistration.html")
 
 def validate_contact(contact):
     if not contact.isdigit() or not contact.startswith(('6', '7', '8', '9')) or len(contact) != 10:
