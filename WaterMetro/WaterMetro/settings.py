@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-+%qbkysj!sm#-t(7*i$*l6ttqd%vo3h&n@tyxz2f_(^3*%9e5b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['watermetro-aquamotus.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -66,7 +66,7 @@ ROOT_URLCONF = 'WaterMetro.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'Templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
