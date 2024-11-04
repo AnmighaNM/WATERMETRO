@@ -20,7 +20,7 @@ from Guest import views
 app_name = "WebGuest"
 
 urlpatterns = [
-    path('Index/',views.index,name='Index'),
+    path('',views.index,name='Index'),
     path('Login/',views.login_view,name='Login'),
     path('ForgetPassword/',views.forgetpassword,name='ForgetPassword'),
     path('OtpVer/', views.OtpVerification,name="Verification"),

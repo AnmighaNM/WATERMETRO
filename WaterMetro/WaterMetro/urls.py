@@ -16,17 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from Guest import views as guest_views
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('',include(('Guest.urls', 'WebGuest'), namespace='WebGuest')),
     path('WebAdmin/',include(('WebAdmin.urls', 'WebAdmin'), namespace='WebAdmin')),
-    path('Guest/',include(('Guest.urls', 'WebGuest'), namespace='WebGuest')),
     path('StationMaster/',include(('StationMaster.urls', 'WebStationMaster'), namespace='WebStationMaster')),
     path('User/', include(('User.urls', 'WebUser'), namespace='WebUser')),
-    path('', guest_views.index, name='index'), # Set the root URL to the index view
 ]
 
 if settings.DEBUG:
