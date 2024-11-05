@@ -65,7 +65,7 @@ def index(request):
         'poor_percent': poor_percent,
     }
 
-    return render(request, 'Guest\index.html', context)
+    return render(request, 'Guest/index.html', context)
 
 def login_view(request):
     if request.method == 'POST':
